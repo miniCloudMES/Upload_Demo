@@ -3,7 +3,7 @@ import os
 from io import BytesIO
 from os.path import join, isfile, isdir
 
-from captcha.models import CaptchaStore
+# from captcha.models import CaptchaStore
 from django.conf import settings
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
@@ -96,7 +96,7 @@ def home(request):
     return render(request, 'fileupload/home.html', locals())
 
 
-def savetomodel(request):
+def save_to_model(request):
     if request.method == 'POST':
         receive_form = UploadIconModelForm(request.POST, request.FILES)
         icon_title = request.POST.get('Title')
@@ -104,7 +104,7 @@ def savetomodel(request):
         capt = request.POST.get("captcha_1", None)  # User Key In
         key = request.POST.get("captcha_0", None)  # Database store
 
-        if check_captcha(capt, key):
+        if icon_title is not None:
 
             # Reduce image size
             post_image = request.FILES.get('IconImage')
@@ -192,14 +192,14 @@ def pre_save_image(sender, instance, *args, **kwargs):
 
 # 確認驗證碼
 
-def check_captcha(captchaStr, captchaHashkey):
-    if captchaStr and captchaHashkey:
-        try:
-            # 依據 hashkey 獲取response值
-            get_captcha = CaptchaStore.objects.get(hashkey=captchaHashkey)
-            if get_captcha.response == captchaStr.lower():  # 驗證通過
-                return True
-        except:
-            return False
-    else:
-        return False
+# def check_captcha(captchaStr, captchaHashkey):
+#     if captchaStr and captchaHashkey:
+#         try:
+#             # 依據 hashkey 獲取response值
+#             get_captcha = CaptchaStore.objects.get(hashkey=captchaHashkey)
+#             if get_captcha.response == captchaStr.lower():  # 驗證通過
+#                 return True
+#         except:
+#             return False
+#     else:
+#         return False

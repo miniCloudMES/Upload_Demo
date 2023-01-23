@@ -18,10 +18,10 @@
     <div class="row">
         <div class="col-lg-4 col-md-6 col-sm-12 mb-30">
             <h4>Upload file with Model</h4>
-            <form action="{% url 'fileupload:savetomodel' %}" method="post" enctype="multipart/form-data">
+            <form action="{% url 'fileupload:save_to_model' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ icon_form }}
-                <p class="text-danger">{{ captcha_message }}</p>
+<!--                <p class="text-danger">{{ captcha_message }}</p>-->
                 <input class="form-control btn btn-warning mt-3" type="submit" value="Upload">
             </form>
             <span>{{ message | safe }}</span>

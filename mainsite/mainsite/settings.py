@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'fileupload',
 
     # Third Part App
-    'captcha',
+    # 'captcha',
 ]
 
 MIDDLEWARE = [
@@ -116,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Taipei'
+TIME_ZONE = 'Asia/ShangHai'
 
 USE_I18N = True
 
@@ -143,7 +143,7 @@ MEDIA_KEY_PREFIX = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
-CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
-CAPTCHA_LETTER_ROTATION = (-5, 5)
+# CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
+# CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
+# CAPTCHA_LETTER_ROTATION = (-5, 5)
 

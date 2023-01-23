@@ -20,6 +20,6 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('savetomodel', views.savetomodel, name='savetomodel'),
+    path('save_to_model', views.save_to_model, name='save_to_model'),
     path('<int:image_id>/update/', views.update, name='update'),
 ]
