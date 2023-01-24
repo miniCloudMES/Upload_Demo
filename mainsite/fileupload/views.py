@@ -28,7 +28,7 @@ def home(request):
                 image_title = obj.Title
                 # print(image_title)
                 obj.delete()
-                message = "圖片 [%s] 已被刪除." % image_title
+                message = "*** 圖片 [%s] 已被刪除." % image_title
                 print(message)
                 return HttpResponseRedirect(reverse('fileupload:home'))
             except Exception as e:
@@ -38,7 +38,7 @@ def home(request):
             folder = settings.MEDIA_ROOT + '/upload/'
             full_path = join(folder, file_name)
             os.remove(full_path)
-            print('%s had been remove.' % file_name)
+            print('***圖片 %s 已被刪除.' % file_name)
             return HttpResponseRedirect(reverse('fileupload:home'))
 
     if request.method == 'POST':
@@ -128,7 +128,7 @@ def save_to_model(request):
                 new_image.IconImage = image
                 # print('Save')
                 new_image.save()
-                print('圖片 [%s] 已上傳。' % icon_title)
+                print('*** 圖片 [%s] 已上傳成功。' % icon_title)
 
             except Exception as e:
                 print('The erro: %s' % e)
@@ -138,7 +138,7 @@ def save_to_model(request):
             icons = UploadIcons.objects.all()
             upload_form = UploadFileForm
             icon_form = UploadIconModelForm
-            captcha_message = 'Wrong Captcha ! 驗證碼錯誤！'
+            message = '檔案不存在！'
             return render(request, 'fileupload/home.html', locals())
 
 
@@ -156,7 +156,7 @@ def update(request, image_id):
     # print(image_id)
     # print(title)
     # print(image_file)
-    print('Update Image: %s' % pick_data.Title)
+    print('*** 圖片已更新: %s' % pick_data.Title)
     pick_data.save()
     return HttpResponseRedirect(reverse('fileupload:home'))
 
