@@ -39,9 +39,6 @@ INSTALLED_APPS = [
 
     # My App
     'fileupload',
-
-    # Third Part App
-    # 'captcha',
 ]
 
 MIDDLEWARE = [
@@ -83,13 +80,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        # 以下使用 mysql.connector.django 鏈接pythonanywhere MySQL伺服器
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'karolin4949$demo',
-        # 'USER': 'karolin4949',
-        # 'PASSWORD': 'player123456',
-        # 'HOST': 'karolin4949.mysql.pythonanywhere-services.com',
-        # 'PORT': '3306',
     }
 }
 
@@ -143,7 +133,4 @@ MEDIA_KEY_PREFIX = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
-# CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_null',)
-# CAPTCHA_LETTER_ROTATION = (-5, 5)
 

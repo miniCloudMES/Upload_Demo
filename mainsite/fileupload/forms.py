@@ -15,7 +15,6 @@ __author__ = 'Karo Lin'
 
 from django import forms
 from django.forms import TextInput, FileInput
-# from captcha.fields import CaptchaField
 from .models import UploadIcons
 
 
@@ -31,11 +30,9 @@ class UploadFileForm(forms.Form):
 
 
 class UploadIconModelForm(forms.ModelForm):
-    # captcha = CaptchaField(label='驗證碼：')
 
     class Meta:
         model = UploadIcons
-        # fields = ['Title', 'IconImage', 'captcha']
         fields = ['Title', 'IconImage']
         labels = {
             'Title': 'Icon Title',
@@ -44,5 +41,4 @@ class UploadIconModelForm(forms.ModelForm):
         widgets = {
             'Title': TextInput(attrs={'class': 'form-control', 'id': 'title'}),
             'IconImage': FileInput(attrs={'class': 'form-control mb-3', 'id': 'upload_icon', 'onchange': 'ShowName()'}),
-            # 'captcha': TextInput(attrs={'class': 'form-control'}),
         }

@@ -21,7 +21,6 @@
             <form action="{% url 'fileupload:save_to_model' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ icon_form }}
-<!--                <p class="text-danger">{{ captcha_message }}</p>-->
                 <input class="form-control btn btn-warning mt-3" type="submit" value="Upload">
             </form>
             <span>{{ message | safe }}</span>

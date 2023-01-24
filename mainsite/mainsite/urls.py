@@ -23,8 +23,6 @@ urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('', include('fileupload.urls', namespace='fileupload')),
 
-                  # Add Third party app url
-                  # path('captcha/', include('captcha.urls')),
 
                   # Add FAV Icon on tab title
                   path('favicon.ico', RedirectView.as_view(url='static/images/favicon.ico')),
