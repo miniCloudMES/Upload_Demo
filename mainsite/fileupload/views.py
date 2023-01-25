@@ -4,6 +4,7 @@ from io import BytesIO
 from os.path import join, isfile, isdir
 
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
 from django.http import HttpResponseRedirect
@@ -12,7 +13,7 @@ from django.urls import reverse
 
 from .forms import UploadFileForm, UploadIconModelForm
 from .models import UploadIcons
-from .utility import make_thumbnail
+from .utility import make_thumbnail, sizeof_fmt
 
 
 def home(request):
@@ -38,26 +39,34 @@ def home(request):
             folder = settings.MEDIA_ROOT + '/upload/'
             full_path = join(folder, file_name)
             os.remove(full_path)
-            print('***圖片 %s 已被刪除.' % file_name)
+            print('***圖片 [%s] 已被刪除.' % file_name)
             return HttpResponseRedirect(reverse('fileupload:home'))
 
     if request.method == 'POST':
         receive_form = UploadFileForm(request.POST, request.FILES)
         receive_file = request.FILES['file']
         if receive_form.is_valid():
-            message = 'The file %s (%d bytes) is correct.' % (receive_file, receive_file.size)
             # print(type(receive_file))
             # print('The size of file is %d bytes' % receive_file.size)
             now_time = datetime.datetime.now()
             # 避免相同檔名覆蓋
             new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
             # print('File Name is %s' % new_file_name)
+            message = '*** 圖片 [%s] 已經儲存為 [%s].' % (receive_file, new_file_name)
             store_path = settings.MEDIA_ROOT + '/upload/'
             # print('Path: %s' % path_file)
 
-            with open(store_path + new_file_name, 'wb+') as file_save_to:
-                for chunk in receive_file.chunks():
-                    file_save_to.write(chunk)
+            # 將上傳的資料儲存於記憶體
+            file_string = BytesIO()
+            for part in receive_file.chunks():
+                file_string.write(part)
+                file_string.flush()
+
+            file_name = receive_file.name
+            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
+            fs = FileSystemStorage()
+            fs.save(store_path + new_file_name, image_file)
+            print(message)
 
         return redirect(reverse('fileupload:home'))
 
@@ -69,7 +78,7 @@ def home(request):
         pass
     else:
         os.makedirs(upload_path.strip().replace('?', ''))
-        print('***目錄不存在，建立目錄')
+        print('*** 目錄不存在，建立目錄')
 
     # 取得所有檔案與子目錄名稱
     files = os.listdir(upload_path)
@@ -107,7 +116,7 @@ def save_to_model(request):
 
             # Reduce image size
             post_image = request.FILES.get('IconImage')
-            print(post_image)
+            message = '*** 圖片 [%s] 已經儲存.' % icon_title
             file_string = BytesIO()
             for part in post_image.chunks():  # 將上傳的資料儲存於記憶體
                 file_string.write(part)
@@ -120,7 +129,8 @@ def save_to_model(request):
                 # 如果檢驗全部通過
                 print('Data Pass Valid.')  # 這裡全部都沒問題
             else:
-                print('Data Error: %s' % receive_form.errors)
+                pass
+                # print('Data Error: %s' % receive_form.errors)
 
             try:
                 new_image = UploadIcons.objects.create()
@@ -128,7 +138,7 @@ def save_to_model(request):
                 new_image.IconImage = image
                 # print('Save')
                 new_image.save()
-                print('*** 圖片 [%s] 已上傳成功。' % icon_title)
+                print(message)
 
             except Exception as e:
                 print('The erro: %s' % e)
@@ -143,20 +153,26 @@ def save_to_model(request):
 
 
 def update(request, image_id):
-    print('Update Image ID:', image_id)
+    print('*** Update Image ID:', image_id)
     pick_data = get_object_or_404(UploadIcons, pk=image_id)
     title = request.POST.get('update_title')
     image_file = request.FILES.get('update_image')
-    print("File Object:", image_file)
     pick_data.Title = title
     if image_file is not None:
-        pick_data.IconImage = image_file
+        file_string = BytesIO()
+        for part in image_file.chunks():  # 將上傳的資料儲存於記憶體
+            file_string.write(part)
+            file_string.flush()
+
+        file_name = image_file.name
+        new_image = make_thumbnail(file_string, file_name, size=(800, 800))
+        pick_data.IconImage = new_image
     else:
         pass
     # print(image_id)
     # print(title)
     # print(image_file)
-    print('*** 圖片已更新: %s' % pick_data.Title)
+    print('*** 圖片[%s]已更新:' % pick_data.Title)
     pick_data.save()
     return HttpResponseRedirect(reverse('fileupload:home'))
 
