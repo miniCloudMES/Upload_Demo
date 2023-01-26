@@ -1,6 +1,9 @@
 # Files-Upload-Demo
-The Project is show how to mnanage upload files with Django.
-
+The Project is show how to manage upload files with Django.  
+***
+Free for personal use.  
+Please contact me for Business use.
+***
 ### Install method:  
 ```
 cd mainsite
