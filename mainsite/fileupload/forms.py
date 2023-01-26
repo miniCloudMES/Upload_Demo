@@ -22,7 +22,7 @@ class UploadFileForm(forms.Form):
     file = forms.FileField(label='Image',
                            widget=(
                                forms.FileInput(
-                                   attrs={'class': 'form-control', 'accept': 'image/gif,image/jpeg, image/png'}
+                                   attrs={'class': 'form-control', 'accept': 'image/*'}
                                                 )
                                 )
 

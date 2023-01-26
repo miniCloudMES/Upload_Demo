@@ -125,13 +125,6 @@ def save_to_model(request):
             file_name = post_image.name
             image = make_thumbnail(file_string, file_name, size=(800, 800))
 
-            if receive_form.is_valid():
-                # 如果檢驗全部通過
-                print('Data Pass Valid.')  # 這裡全部都沒問題
-            else:
-                pass
-                # print('Data Error: %s' % receive_form.errors)
-
             try:
                 new_image = UploadIcons.objects.create()
                 new_image.Title = icon_title
