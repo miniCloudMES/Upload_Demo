@@ -44,31 +44,31 @@ def make_thumbnail(image, file_name, size=(500, 500)):
     """Makes thumbnails of given size from given image"""
     pil_image = Image.open(image)
     w, h = pil_image.size
-    print('*** Original image scale is Width:%s, Height:%s.' % (w, h))
+    print('\033[93m*** Original image scale is Width:%s, Height:%s.\033[00m' % (w, h))
     origin_image_size = image.getbuffer().nbytes
-    print('*** Original Image Size: %s' % sizeof_fmt(origin_image_size))
+    print('\033[93m*** Original Image Size: %s\033[00m' % sizeof_fmt(origin_image_size))
     try:
         for orientation in ExifTags.TAGS.keys():
             if ExifTags.TAGS[orientation] == 'Orientation':
                 break
         exif = dict(pil_image._getexif().items())
         if exif[orientation] == 3:
-            pil_Image = pil_image.rotate(180, expand=True)
+            pil_image = pil_image.rotate(180, expand=True)
         elif exif[orientation] == 6:
-            pil_Image = pil_image.rotate(270, expand=True)
+            pil_image = pil_image.rotate(270, expand=True)
         elif exif[orientation] == 8:
-            pil_Image = pil_image.rotate(90, expand=True)
+            pil_image = pil_image.rotate(90, expand=True)
     except (AttributeError, KeyError, IndexError):
         # cases: image don't have getexif
         pass
     pil_image.thumbnail(size)  # resize image
     w, h = pil_image.size
-    print('*** New image scale is Width:%s, Height:%s.' % (w, h))
+    print('\033[93m*** New image scale is Width:%s, Height:%s.\033[00m' % (w, h))
     if pil_image.mode in ("RGBA", "P"):
         pil_image = pil_image.convert("RGB")  # convert mode
     thumb_io = BytesIO()  # create a BytesIO object
     pil_image.save(thumb_io, 'JPEG', quality=85)  # save image to BytesIO object
     thumbnail = File(thumb_io, name=file_name)  # create a django friendly File object
     new_size = int(thumbnail.size)
-    print('*** New Image Size: %s' % sizeof_fmt(new_size))
+    print('\033[93m*** New Image Size: %s\033[00m' % sizeof_fmt(new_size))
     return thumbnail

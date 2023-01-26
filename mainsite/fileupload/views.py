@@ -29,7 +29,7 @@ def home(request):
                 image_title = obj.Title
                 # print(image_title)
                 obj.delete()
-                message = "*** 圖片 [%s] 已被刪除." % image_title
+                message = "\033[93m*** 圖片 [%s] 已被刪除.\033[00m" % image_title
                 print(message)
                 return HttpResponseRedirect(reverse('fileupload:home'))
             except Exception as e:
@@ -39,7 +39,7 @@ def home(request):
             folder = settings.MEDIA_ROOT + '/upload/'
             full_path = join(folder, file_name)
             os.remove(full_path)
-            print('***圖片 [%s] 已被刪除.' % file_name)
+            print('\033[93m***圖片 [%s] 已被刪除.\033[00m' % file_name)
             return HttpResponseRedirect(reverse('fileupload:home'))
 
     if request.method == 'POST':
@@ -52,7 +52,7 @@ def home(request):
             # 避免相同檔名覆蓋
             new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
             # print('File Name is %s' % new_file_name)
-            message = '*** 圖片 [%s] 已經儲存為 [%s].' % (receive_file, new_file_name)
+            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
             store_path = settings.MEDIA_ROOT + '/upload/'
             # print('Path: %s' % path_file)
 
@@ -78,7 +78,7 @@ def home(request):
         pass
     else:
         os.makedirs(upload_path.strip().replace('?', ''))
-        print('*** 目錄不存在，建立目錄')
+        print('\033[93m*** 目錄不存在，建立目錄\033[00m')
 
     # 取得所有檔案與子目錄名稱
     files = os.listdir(upload_path)
@@ -92,9 +92,7 @@ def home(request):
         fullpath = join(upload_path, file)
         # 判斷 fullpath 是檔案還是目錄
         if isfile(fullpath):
-
             images_list.append({'file': file, 'path': image_path + file})
-
             # print("檔案:", file, " 路徑：", fullpath)
         elif isdir(fullpath):
             print("目錄：", file)
@@ -116,7 +114,7 @@ def save_to_model(request):
 
             # Reduce image size
             post_image = request.FILES.get('IconImage')
-            message = '*** 圖片 [%s] 已經儲存.' % icon_title
+            message = '\033[93m*** 圖片 [%s] 已經儲存.\033[00m' % icon_title
             file_string = BytesIO()
             for part in post_image.chunks():  # 將上傳的資料儲存於記憶體
                 file_string.write(part)
@@ -146,7 +144,7 @@ def save_to_model(request):
 
 
 def update(request, image_id):
-    print('*** Update Image ID:', image_id)
+    print('\033[93m*** Update Image ID:\033[00m', image_id)
     pick_data = get_object_or_404(UploadIcons, pk=image_id)
     title = request.POST.get('update_title')
     image_file = request.FILES.get('update_image')
@@ -165,7 +163,7 @@ def update(request, image_id):
     # print(image_id)
     # print(title)
     # print(image_file)
-    print('*** 圖片[%s]已更新:' % pick_data.Title)
+    print('\033[93m*** 圖片[%s]已更新:\033[00m' % pick_data.Title)
     pick_data.save()
     return HttpResponseRedirect(reverse('fileupload:home'))
 
