@@ -39,7 +39,7 @@ def home(request):
             folder = settings.MEDIA_ROOT + '/upload/'
             full_path = join(folder, file_name)
             os.remove(full_path)
-            print('\033[93m***圖片 [%s] 已被刪除.\033[00m' % file_name)
+            print('\033[93m*** 圖片 [%s] 已被刪除.\033[00m' % file_name)
             return HttpResponseRedirect(reverse('fileupload:home'))
 
     if request.method == 'POST':

@@ -44,7 +44,7 @@ def make_thumbnail(image, file_name, size=(500, 500)):
     """Makes thumbnails of given size from given image"""
     pil_image = Image.open(image)
     w, h = pil_image.size
-    print('\033[93m*** Original image scale is Width:%s, Height:%s.\033[00m' % (w, h))
+    print('\033[93m*** Original image scale W:%spx, H:%spx.\033[00m' % (w, h))
     origin_image_size = image.getbuffer().nbytes
     print('\033[93m*** Original Image Size: %s\033[00m' % sizeof_fmt(origin_image_size))
     try:
@@ -63,7 +63,7 @@ def make_thumbnail(image, file_name, size=(500, 500)):
         pass
     pil_image.thumbnail(size)  # resize image
     w, h = pil_image.size
-    print('\033[93m*** New image scale is Width:%s, Height:%s.\033[00m' % (w, h))
+    print('\033[93m*** New image scale W:%spx, H:%spx.\033[00m' % (w, h))
     if pil_image.mode in ("RGBA", "P"):
         pil_image = pil_image.convert("RGB")  # convert mode
     thumb_io = BytesIO()  # create a BytesIO object
