@@ -144,7 +144,7 @@ def save_to_model(request):
 
 
 def update(request, image_id):
-    print('\033[93m*** Update Image ID:\033[00m', image_id)
+    print('\033[93m*** Update Image ID:%s\033[00m' % image_id)
     pick_data = get_object_or_404(UploadIcons, pk=image_id)
     title = request.POST.get('update_title')
     image_file = request.FILES.get('update_image')
