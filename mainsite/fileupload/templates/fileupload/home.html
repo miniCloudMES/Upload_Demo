@@ -20,7 +20,7 @@
                 <form action="{% url 'fileupload:save_to_model' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ icon_form }}
-                    <input class="form-control btn btn-warning mt-3" type="submit" value="Upload">
+                    <input class="form-control btn btn-warning btn-sm mt-3" type="submit" value="Upload">
                 </form>
                 <span>{{ message | safe }}</span>
             </div>
@@ -44,9 +44,10 @@
                              style="height: 200px;">
                     </a>
                     <div class="card-body">
-                        <p class="card-text">{{ icon.Title }}</p>
-                        <a class="btn btn-danger" href="{% url 'fileupload:home' %}?do=del&id={{ icon.id }}" role="button">Del</a>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#Modal{{ icon.id }}">Update</button>
+                        <h5 class="card-title">{{ icon.Title }}</h5>
+                        <p class="card-text">{{ icon.Description }}</p>
+                        <a class="btn btn-danger btn-sm" href="{% url 'fileupload:home' %}?do=del&id={{ icon.id }}" role="button">Del</a>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#Modal{{ icon.id }}">Update</button>
                     </div>
                 </div>
             </div>
@@ -63,7 +64,7 @@
                             <img src="{{ icon.IconImage.url }}" alt="{{ icon.Title }}" style="width:100%">
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -84,6 +85,10 @@
                                     <label for="update_title" class="col-form-label">Title:</label>
                                     <input type="text" class="form-control" id="update_title" name="update_title" value="{{ icon.Title }}" required>
                                   </div>
+                                    <div class="mb-3">
+                                    <label for="update_description" class="col-form-label">Description:</label>
+                                        <textarea class="form-control" id="update_description" name="update_description"  required>{{ icon.Description }}</textarea>
+                                  </div>
                                   <div class="mb-3">
                                     <label for="update_image" class="col-form-label">Update Image:</label>
                                     <input type="file"  class="form-control" name="update_image" accept="image/*" id="update_image" >
@@ -91,8 +96,8 @@
                                 </form>
                               </div>
                               <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                  <input class="btn btn-warning" type="submit" value="Update" form="update_form{{ icon.id }}">
+                                  <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                  <input class="btn btn-warning btn-sm" type="submit" value="Update" form="update_form{{ icon.id }}">
                               </div>
                             </div>
                           </div>
@@ -108,7 +113,7 @@
                 <form action="{% url 'fileupload:home' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ upload_form }}
-                    <input class="form-control btn btn-warning" type="submit" value="Upload">
+                    <input class="form-control btn btn-warning btn-sm" type="submit" value="Upload">
                 </form>
             </div>
             <div class="col-6">
@@ -127,7 +132,7 @@
                     </a>
                     <div class="card-body">
                         <p>Photo:{{forloop.counter}}</p>
-                        <a class="btn btn-danger" href="{% url 'fileupload:home' %}?do=del_file&file={{ image.file }}" role="button">Del</a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'fileupload:home' %}?do=del_file&file={{ image.file }}" role="button">Del</a>
                     </div>
 
                 </div>
@@ -139,13 +144,13 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="ModalLabel">Photo{{ forloop.counter }}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <img src="{{ image.path }}" alt="Image" style="width:100%">
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>

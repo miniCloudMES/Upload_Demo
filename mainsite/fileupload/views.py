@@ -106,6 +106,7 @@ def save_to_model(request):
     if request.method == 'POST':
         receive_form = UploadIconModelForm(request.POST, request.FILES)
         icon_title = request.POST.get('Title')
+        icon_description = request.POST.get('Description')
         # print(icon_title)
         capt = request.POST.get("captcha_1", None)  # User Key In
         key = request.POST.get("captcha_0", None)  # Database store
@@ -126,6 +127,7 @@ def save_to_model(request):
             try:
                 new_image = UploadIcons.objects.create()
                 new_image.Title = icon_title
+                new_image.Description = icon_description
                 new_image.IconImage = image
                 # print('Save')
                 new_image.save()
@@ -147,8 +149,10 @@ def update(request, image_id):
     print('\033[93m*** Update Image ID:%s\033[00m' % image_id)
     pick_data = get_object_or_404(UploadIcons, pk=image_id)
     title = request.POST.get('update_title')
+    description = request.POST.get('update_description')
     image_file = request.FILES.get('update_image')
     pick_data.Title = title
+    pick_data.Description = description
     if image_file is not None:
         file_string = BytesIO()
         for part in image_file.chunks():  # 將上傳的資料儲存於記憶體
