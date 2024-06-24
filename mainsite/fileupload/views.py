@@ -33,14 +33,18 @@ def home(request):
                 print(message)
                 return HttpResponseRedirect(reverse('fileupload:home'))
             except Exception as e:
-                message = 'Can not fine the image ! <br> %s' % e
+                message = 'Can not fine the image ! (No file has been delete.)'
         elif action == 'del_file':
             file_name = request.GET.get('file')
             folder = settings.MEDIA_ROOT + '/upload/'
             full_path = join(folder, file_name)
-            os.remove(full_path)
-            print('\033[93m*** 圖片 [%s] 已被刪除.\033[00m' % file_name)
-            return HttpResponseRedirect(reverse('fileupload:home'))
+            try:
+                os.remove(full_path)
+                print('\033[93m*** 圖片 [%s] 已被刪除.\033[00m' % file_name)
+                return HttpResponseRedirect(reverse('fileupload:home'))
+            except Exception as e:
+                message = 'Can not fine the image ! (No file has been delete.)'
+            
 
     if request.method == 'POST':
         receive_form = UploadFileForm(request.POST, request.FILES)
@@ -144,7 +148,7 @@ def save_to_model(request):
             message = '檔案不存在！'
             return render(request, 'fileupload/home.html', locals())
 
-
+# Update the model data or image.
 def update(request, image_id):
     print('\033[93m*** Update Image ID:%s\033[00m' % image_id)
     pick_data = get_object_or_404(UploadIcons, pk=image_id)

@@ -14,6 +14,12 @@
 </head>
 <body>
     <div class="container mt-3">
+        {% if message %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+           {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endif %}
         <div class="row">
             <div class="col-lg-4 col-md-6 col-sm-12 mb-30">
                 <h4>Upload file with Model</h4>
@@ -22,7 +28,6 @@
                     {{ icon_form }}
                     <input class="form-control btn btn-warning btn-sm mt-3" type="submit" value="Upload">
                 </form>
-                <span>{{ message | safe }}</span>
             </div>
             <div class="col-lg-3 col-md-6 col-sm-12 mb-30">
                 <a href="https://minimes.pythonanywhere.com" target="_blank">
@@ -32,7 +37,6 @@
                 <h4>Django 使用影像模組上傳圖片介紹。</h4>
             </div>
         </div>
-        <br>
         <hr>
         <div class="row">
             {% for icon in icons %}
