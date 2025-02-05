@@ -4,6 +4,7 @@ from io import BytesIO
 from os.path import join, isfile, isdir
 
 from django.conf import settings
+from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
@@ -22,7 +23,6 @@ def home(request):
         if action == 'del':
             try:
                 image_id = request.GET.get('id')
-
                 # print('id: %s' % image_id)
                 obj = UploadIcons.objects.get(pk=image_id)
                 # print(obj)
@@ -31,7 +31,7 @@ def home(request):
                 obj.delete()
                 message = "\033[93m*** 圖片 [%s] 已被刪除.\033[00m" % image_title
                 print(message)
-                return HttpResponseRedirect(reverse('fileupload:home'))
+                return redirect(reverse('fileupload:home'))
             except Exception as e:
                 message = 'Can not fine the image ! (No file has been delete.)'
         elif action == 'del_file':
@@ -40,54 +40,23 @@ def home(request):
             full_path = join(folder, file_name)
             try:
                 os.remove(full_path)
-                print('\033[93m*** 圖片 [%s] 已被刪除.\033[00m' % file_name)
-                return HttpResponseRedirect(reverse('fileupload:home'))
+                message = "\033[93m*** 圖片 [%s] 已被刪除.\033[00m" % file_name
+                print(message)
+                return redirect(reverse('fileupload:home'))
             except Exception as e:
                 message = 'Can not fine the image ! (No file has been delete.)'
-            
-
-    if request.method == 'POST':
-        receive_form = UploadFileForm(request.POST, request.FILES)
-        receive_file = request.FILES['file']
-        if receive_form.is_valid():
-            # print(type(receive_file))
-            # print('The size of file is %d bytes' % receive_file.size)
-            now_time = datetime.datetime.now()
-            # 避免相同檔名覆蓋
-            new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
-            # print('File Name is %s' % new_file_name)
-            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
-            store_path = settings.MEDIA_ROOT + '/upload/'
-            # print('Path: %s' % path_file)
-
-            # 將上傳的資料儲存於記憶體
-            file_string = BytesIO()
-            for part in receive_file.chunks():
-                file_string.write(part)
-                file_string.flush()
-
-            file_name = receive_file.name
-            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
-            fs = FileSystemStorage()
-            fs.save(store_path + new_file_name, image_file)
-            print(message)
-
-        return redirect(reverse('fileupload:home'))
 
     upload_path = settings.MEDIA_ROOT + '/upload/'
     # print('Path: %s' % upload_path)
-
     if os.path.exists(upload_path.strip().replace('?', '')):
         # print('***目錄已存在')
         pass
     else:
         os.makedirs(upload_path.strip().replace('?', ''))
         print('\033[93m*** 目錄不存在，建立目錄\033[00m')
-
     # 取得所有檔案與子目錄名稱
     files = os.listdir(upload_path)
     # print('The files in the folder: %s' % files)
-
     # 以迴圈處理
     image_path = settings.MEDIA_URL + 'upload/'
     images_list = []
@@ -106,6 +75,35 @@ def home(request):
     return render(request, 'fileupload/home.html', locals())
 
 
+def save_to_file(request):
+    # Direct Save to file.
+    if request.method == 'POST':
+        receive_form = UploadFileForm(request.POST, request.FILES)
+        receive_file = request.FILES['file']
+        if receive_form.is_valid():
+            # print(type(receive_file))
+            # print('The size of file is %d bytes' % receive_file.size)
+            now_time = datetime.datetime.now()
+            # 避免相同檔名覆蓋
+            new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
+            # print('File Name is %s' % new_file_name)
+            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
+            store_path = settings.MEDIA_ROOT + '/upload/'
+            # print('Path: %s' % path_file)
+            # 將上傳的資料儲存於記憶體
+            file_string = BytesIO()
+            for part in receive_file.chunks():
+                file_string.write(part)
+                file_string.flush()
+
+            file_name = receive_file.name
+            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
+            fs = FileSystemStorage()
+            fs.save(store_path + new_file_name, image_file)
+            print(message)
+    return redirect(reverse('fileupload:home'))
+
+
 def save_to_model(request):
     if request.method == 'POST':
         receive_form = UploadIconModelForm(request.POST, request.FILES)
@@ -116,7 +114,6 @@ def save_to_model(request):
         key = request.POST.get("captcha_0", None)  # Database store
 
         if icon_title is not None:
-
             # Reduce image size
             post_image = request.FILES.get('IconImage')
             message = '\033[93m*** 圖片 [%s] 已經儲存.\033[00m' % icon_title
@@ -138,15 +135,15 @@ def save_to_model(request):
                 print(message)
 
             except Exception as e:
-                print('The erro: %s' % e)
-
-            return redirect(reverse('fileupload:home'))
+                message = 'The error: %s' % e
+                print(message)
         else:
             icons = UploadIcons.objects.all()
             upload_form = UploadFileForm
             icon_form = UploadIconModelForm
             message = '檔案不存在！'
-            return render(request, 'fileupload/home.html', locals())
+        return redirect(reverse('fileupload:home'))
+
 
 # Update the model data or image.
 def update(request, image_id):
@@ -173,23 +170,23 @@ def update(request, image_id):
     # print(image_file)
     print('\033[93m*** 圖片[%s]已更新:\033[00m' % pick_data.Title)
     pick_data.save()
-    return HttpResponseRedirect(reverse('fileupload:home'))
+    return redirect(reverse('fileupload:home'))
 
 
-# 刪除使用 FileField 或是 ImageField 儲存的檔案
+# 刪除使用 FileField 或是 ImageField 儲存的檔案, Delete real image when model do delete data.
 @receiver(post_delete, sender=UploadIcons)
 def post_save_image(sender, instance, *args, **kwargs):
     """ Clean Old Image file """
     try:
         instance.IconImage.delete(save=False)
-    except:
-        pass
+    except Exception as e:
+        print("Error: %s" % e)
 
 
-# 更新使用 FileField 或是 ImageField 儲存的檔案
+# 更新使用 FileField 或是 ImageField 儲存的檔案, Check New image exist, Delete Old Image or not.
 @receiver(pre_save, sender=UploadIcons)
 def pre_save_image(sender, instance, *args, **kwargs):
-    """ instance old image file will delete from os """
+    """ If instance is old image file will delete from os """
     try:
         old_img = instance.__class__.objects.get(id=instance.id).IconImage.path
         try:
@@ -200,5 +197,5 @@ def pre_save_image(sender, instance, *args, **kwargs):
             import os
             if os.path.exists(old_img):
                 os.remove(old_img)
-    except:
-        pass
+    except Exception as e:
+        print("Error: %s" % e)

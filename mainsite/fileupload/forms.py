@@ -19,14 +19,14 @@ from .models import UploadIcons
 
 
 class UploadFileForm(forms.Form):
-    file = forms.FileField(label='Image',
-                           widget=(
-                               forms.FileInput(
-                                   attrs={'class': 'form-control', 'accept': 'image/*'}
-                               )
-                           )
-
-                           )
+    file = forms.FileField(
+        label='Image',
+        widget=(
+            forms.FileInput(
+                attrs={'class': 'form-control', 'accept': 'image/*'}
+            )
+        )
+    )
 
 
 class UploadIconModelForm(forms.ModelForm):
