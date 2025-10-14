@@ -6,9 +6,8 @@ Please contact me for Business use.
 ***
 
 If you want to use Pillow in Termux,
-
 You should install the library first for image handling function Pillow.
-```commandline
+```
 pkg install libjpeg-turbo
 ```
 
