@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,6 +16,26 @@
 </head>
 <body>
     <div class="container mt-3">
+=======
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Upload Home</title>
+        {% load static %}
+        <!--    Load Bootstrap css -->
+        <link rel="stylesheet" href="{% static 'css/bootstrap-5.3.0.min.css' %}" type="text/css" >
+        <link rel="stylesheet" href="{% static 'fileupload/css/style.css' %}" type="text/css">
+        <script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+    </head>
+    <body>
+        <div class="container mt-3">
+        {% if message %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+               {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endif %}
+>>>>>>> a5b9ae2058e31d52049cd636b0449a65fe6cfbd3
         <div class="row">
             <div class="col-lg-4 col-md-6 col-sm-12 mb-30">
                 <h4>Upload file with Model</h4>
@@ -23,7 +44,6 @@
                     {{ icon_form }}
                     <input class="form-control btn btn-warning btn-sm mt-3" type="submit" value="Upload">
                 </form>
-                <span>{{ message | safe }}</span>
             </div>
             <div class="col-lg-3 col-md-6 col-sm-12 mb-30">
                 <a href="https://minimes.pythonanywhere.com" target="_blank">
@@ -33,7 +53,6 @@
                 <h4>Django 使用影像模組上傳圖片介紹。</h4>
             </div>
         </div>
-        <br>
         <hr>
         <div class="row">
             {% for icon in icons %}
@@ -55,7 +74,7 @@
             <!-- Show Image Modal -->
             <div class="modal fade" id="exampleModal{{ icon.id }}" tabindex="-1" aria-labelledby="exampleModalLabel"
                  aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="exampleModalLabel">{{ icon.Title }}</h1>
@@ -111,7 +130,7 @@
         <div class="row">
             <div class="col-lg-3 col-md-6 col-sm-12 mb-30">
                 <h4>Upload file to Folder</h4>
-                <form action="{% url 'fileupload:home' %}" method="post" enctype="multipart/form-data">
+                <form action="{% url 'fileupload:save_to_file' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ upload_form }}
                     <input class="form-control btn btn-warning btn-sm" type="submit" value="Upload">
@@ -135,13 +154,12 @@
                         <p>Photo:{{forloop.counter}}</p>
                         <a class="btn btn-danger btn-sm" href="{% url 'fileupload:home' %}?do=del_file&file={{ image.file }}" role="button">Del</a>
                     </div>
-
                 </div>
             </div>
             <!-- Show Modal -->
             <div class="modal fade" id="ShowModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="ModalLabel"
                  aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="ModalLabel">Photo{{ forloop.counter }}</h1>
@@ -159,23 +177,18 @@
             <!--Modal End-->
             {% endfor %}
         </div>
-
-        <br>
-        <hr>
+        <br><hr>
         <div>
             <h4>This is the footer.</h4>
         </div>
     </div>
-
-    <!-- Load Bootstrap js -->
-    <!--        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>-->
-    <script src="{% static 'js/bootstrap-5.3.0.bundle.min.js' %}"></script>
-    <script>
-        function ShowName() {
-            var filename = document.getElementById("upload_icon").files[0].name;
-            document.getElementById("title").value = filename.split(".")[0];
-        }
-    </script>
-
-</body>
+        <!-- Load Bootstrap js -->
+        <script src="{% static 'js/bootstrap-5.3.0.bundle.min.js' %}"></script>
+        <script>
+            function ShowName() {
+                var filename = document.getElementById("upload_icon").files[0].name;
+                document.getElementById("title").value = filename.split(".")[0];
+            }
+        </script>
+    </body>
 </html>
