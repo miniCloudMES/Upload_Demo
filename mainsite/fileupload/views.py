@@ -101,6 +101,33 @@ def home(request):
     icon_form = UploadIconModelForm
     return render(request, 'fileupload/home.html', locals())
 
+def save_to_file(request):
+    # Direct Save to file.
+    if request.method == 'POST':
+        receive_form = UploadFileForm(request.POST, request.FILES)
+        receive_file = request.FILES['file']
+        if receive_form.is_valid():
+            # print(type(receive_file))
+            # print('The size of file is %d bytes' % receive_file.size)
+            now_time = datetime.datetime.now()
+            # 避免相同檔名覆蓋
+            new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
+            # print('File Name is %s' % new_file_name)
+            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
+            store_path = settings.MEDIA_ROOT + '/upload/'
+            # print('Path: %s' % path_file)
+            # 將上傳的資料儲存於記憶體
+            file_string = BytesIO()
+            for part in receive_file.chunks():
+                file_string.write(part)
+                file_string.flush()
+
+            file_name = receive_file.name
+            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
+            fs = FileSystemStorage()
+            fs.save(store_path + new_file_name, image_file)
+            print(message)
+    return redirect(reverse('fileupload:home'))
 
 def save_to_model(request):
     if request.method == 'POST':
@@ -170,16 +197,6 @@ def update(request, image_id):
     print('\033[93m*** 圖片[%s]已更新:\033[00m' % pick_data.Title)
     pick_data.save()
     return HttpResponseRedirect(reverse('fileupload:home'))
-
-
-# 刪除使用 FileField 或是 ImageField 儲存的檔案
-@receiver(post_delete, sender=UploadIcons)
-def post_save_image(sender, instance, *args, **kwargs):
-    """ Clean Old Image file """
-    try:
-        instance.IconImage.delete(save=False)
-    except:
-        pass
 
 
 # 更新使用 FileField 或是 ImageField 儲存的檔案
