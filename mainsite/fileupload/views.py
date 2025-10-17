@@ -1,5 +1,6 @@
 import datetime
 import os
+import shortuuid
 from io import BytesIO
 from os.path import join, isfile, isdir
 
@@ -19,67 +20,36 @@ from .utility import make_thumbnail, sizeof_fmt
 def home(request):
     if request.method == 'GET':
         action = request.GET.get('do')
-        if action == 'del':
+        if action == 'del':  # Delete File and Database Record
             try:
                 image_id = request.GET.get('id')
-
                 # print('id: %s' % image_id)
                 obj = UploadIcons.objects.get(pk=image_id)
                 # print(obj)
                 image_title = obj.Title
                 # print(image_title)
                 obj.delete()
-                message = "\033[93m*** 圖片 [%s] 已被刪除.\033[00m" % image_title
-                print(message)
-                return HttpResponseRedirect(reverse('fileupload:home'))
+                message = "*** 圖片 [%s] 已被刪除." % image_title
+                color_message = "\033[93m*** 圖片 [%s] 已被刪除.\033[00m" % image_title
+                print(color_message)
             except Exception as e:
                 message = 'Can not fine the image ! <br> %s' % e
-        elif action == 'del_file':
+        elif action == 'del_file':  # Only Delete File
             file_name = request.GET.get('file')
             folder = settings.MEDIA_ROOT + '/upload/'
             full_path = join(folder, file_name)
             os.remove(full_path)
+            message = "*** 圖片 [%s] 已被刪除." % file_name
             print('\033[93m*** 圖片 [%s] 已被刪除.\033[00m' % file_name)
-            return HttpResponseRedirect(reverse('fileupload:home'))
-
-    if request.method == 'POST':
-        receive_form = UploadFileForm(request.POST, request.FILES)
-        receive_file = request.FILES['file']
-        if receive_form.is_valid():
-            # print(type(receive_file))
-            # print('The size of file is %d bytes' % receive_file.size)
-            now_time = datetime.datetime.now()
-            # 避免相同檔名覆蓋
-            new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
-            # print('File Name is %s' % new_file_name)
-            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
-            store_path = settings.MEDIA_ROOT + '/upload/'
-            # print('Path: %s' % path_file)
-
-            # 將上傳的資料儲存於記憶體
-            file_string = BytesIO()
-            for part in receive_file.chunks():
-                file_string.write(part)
-                file_string.flush()
-
-            file_name = receive_file.name
-            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
-            fs = FileSystemStorage()
-            fs.save(store_path + new_file_name, image_file)
-            print(message)
-
-        return redirect(reverse('fileupload:home'))
 
     upload_path = settings.MEDIA_ROOT + '/upload/'
     # print('Path: %s' % upload_path)
-
     if os.path.exists(upload_path.strip().replace('?', '')):
         # print('***目錄已存在')
         pass
     else:
         os.makedirs(upload_path.strip().replace('?', ''))
         print('\033[93m*** 目錄不存在，建立目錄\033[00m')
-
     # 取得所有檔案與子目錄名稱
     files = os.listdir(upload_path)
     # print('The files in the folder: %s' % files)
@@ -101,33 +71,6 @@ def home(request):
     icon_form = UploadIconModelForm
     return render(request, 'fileupload/home.html', locals())
 
-def save_to_file(request):
-    # Direct Save to file.
-    if request.method == 'POST':
-        receive_form = UploadFileForm(request.POST, request.FILES)
-        receive_file = request.FILES['file']
-        if receive_form.is_valid():
-            # print(type(receive_file))
-            # print('The size of file is %d bytes' % receive_file.size)
-            now_time = datetime.datetime.now()
-            # 避免相同檔名覆蓋
-            new_file_name = now_time.strftime('%Y%m%d_%H%M%S' + '.jpg')
-            # print('File Name is %s' % new_file_name)
-            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
-            store_path = settings.MEDIA_ROOT + '/upload/'
-            # print('Path: %s' % path_file)
-            # 將上傳的資料儲存於記憶體
-            file_string = BytesIO()
-            for part in receive_file.chunks():
-                file_string.write(part)
-                file_string.flush()
-
-            file_name = receive_file.name
-            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
-            fs = FileSystemStorage()
-            fs.save(store_path + new_file_name, image_file)
-            print(message)
-    return redirect(reverse('fileupload:home'))
 
 def save_to_model(request):
     if request.method == 'POST':
@@ -215,3 +158,33 @@ def pre_save_image(sender, instance, *args, **kwargs):
                 os.remove(old_img)
     except:
         pass
+
+
+def save_to_file(request):
+    # Direct Save to file.
+    if request.method == 'POST':
+        receive_form = UploadFileForm(request.POST, request.FILES)
+        receive_file = request.FILES['file']
+        if receive_form.is_valid():
+            # print(type(receive_file))
+            # print('The size of file is %d bytes' % receive_file.size)
+            now_time = datetime.datetime.now()
+            # 避免相同檔名覆蓋
+            new_file_name = now_time.strftime('%Y%m%d_%H%M%S_'+shortuuid.ShortUUID().random(length=5) + '.jpg')
+            # print('File Name is %s' % new_file_name)
+
+            store_path = settings.MEDIA_ROOT + '/upload/'
+            # print('Path: %s' % path_file)
+            # 將上傳的資料儲存於記憶體
+            file_string = BytesIO()
+            for part in receive_file.chunks():
+                file_string.write(part)
+                file_string.flush()
+
+            file_name = receive_file.name
+            image_file = make_thumbnail(file_string, file_name, size=(800, 800))
+            fs = FileSystemStorage()
+            fs.save(store_path + new_file_name, image_file)
+            message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
+            print(message)
+    return redirect(reverse('fileupload:home'))
