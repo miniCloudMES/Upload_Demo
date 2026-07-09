@@ -1,7 +1,7 @@
 If you want to use uWsgi and nginx, you can install:
 ```commandline
-pkg install uwgsi # Linux 
-pip install uwgsi # Mac
+pkg install uwsgi # Linux 
+pip install uwsgi # Mac
 pkg install nginx
 ```
 
