@@ -186,6 +186,144 @@
                 var filename = document.getElementById("upload_icon").files[0].name;
                 document.getElementById("title").value = filename.split(".")[0];
             }
+
+            // Client-side image compression function
+            async function compressImage(file, maxSizeBytes = 500 * 1024) {
+                if (!file || !file.type.startsWith('image/')) {
+                    return file;
+                }
+                
+                // If it is already smaller than 500KB, no need to compress
+                if (file.size <= maxSizeBytes) {
+                    console.log(`File ${file.name} is already under 500KB (${(file.size/1024).toFixed(2)} KB). Skipping compression.`);
+                    return file;
+                }
+
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function (event) {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+
+                            // Scale down if image is extremely large to speed up canvas processing
+                            const maxDimension = 2048;
+                            if (width > maxDimension || height > maxDimension) {
+                                if (width > height) {
+                                    height = Math.round((height * maxDimension) / width);
+                                    width = maxDimension;
+                                } else {
+                                    width = Math.round((width * maxDimension) / height);
+                                    height = maxDimension;
+                                }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            // Binary search or iterative step down quality to fit under 500KB
+                            let quality = 0.9;
+                            let minQuality = 0.1;
+                            let compressedBlob = null;
+
+                            function attemptCompression() {
+                                canvas.toBlob((blob) => {
+                                    if (!blob) {
+                                        resolve(file); // fallback to original
+                                        return;
+                                    }
+                                    console.log(`Quality: ${quality.toFixed(2)}, Size: ${(blob.size / 1024).toFixed(2)} KB`);
+                                    
+                                    if (blob.size <= maxSizeBytes || quality <= minQuality) {
+                                        // Done or reached minimum quality
+                                        const compressedFile = new File([blob], file.name, {
+                                            type: 'image/jpeg',
+                                            lastModified: Date.now()
+                                        });
+                                        resolve(compressedFile);
+                                    } else {
+                                        // Reduce quality and try again
+                                        quality -= 0.1;
+                                        attemptCompression();
+                                    }
+                                }, 'image/jpeg', quality);
+                            }
+
+                            attemptCompression();
+                        };
+                        img.onerror = function() {
+                            resolve(file);
+                        };
+                    };
+                    reader.onerror = function() {
+                        resolve(file);
+                    };
+                });
+            }
+
+            // Hook into form submissions to compress files
+            window.addEventListener('DOMContentLoaded', () => {
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    form.addEventListener('submit', async function (e) {
+                        // Find any file input in this form
+                        const fileInputs = form.querySelectorAll('input[type="file"]');
+                        let hasImageToCompress = false;
+                        
+                        for (let input of fileInputs) {
+                            if (input.files && input.files.length > 0) {
+                                for (let file of input.files) {
+                                    if (file.type.startsWith('image/') && file.size > 500 * 1024) {
+                                        hasImageToCompress = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (hasImageToCompress) {
+                            e.preventDefault(); // Stop original submit
+                            
+                            // Show some loading indicator if needed (optional)
+                            const submitBtn = form.querySelector('input[type="submit"], button[type="submit"]');
+                            const originalVal = submitBtn ? (submitBtn.value || submitBtn.textContent) : 'Submit';
+                            if (submitBtn) {
+                                if (submitBtn.tagName === 'INPUT') submitBtn.value = 'Compressing...';
+                                else submitBtn.textContent = 'Compressing...';
+                                submitBtn.disabled = true;
+                            }
+
+                            try {
+                                for (let input of fileInputs) {
+                                    if (input.files && input.files.length > 0) {
+                                        const dt = new DataTransfer();
+                                        for (let file of input.files) {
+                                            if (file.type.startsWith('image/')) {
+                                                const compressed = await compressImage(file);
+                                                dt.items.add(compressed);
+                                            } else {
+                                                dt.items.add(file);
+                                            }
+                                        }
+                                        input.files = dt.files;
+                                    }
+                                }
+                            } catch (err) {
+                                console.error("Error compressing image:", err);
+                            }
+
+                            // Re-submit form
+                            form.submit();
+                        }
+                    });
+                });
+            });
         </script>
     </body>
 </html>

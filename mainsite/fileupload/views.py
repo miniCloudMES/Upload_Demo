@@ -85,26 +85,34 @@ def save_to_model(request):
 
             # Reduce image size
             post_image = request.FILES.get('IconImage')
-            message = '\033[93m*** 圖片 [%s] 已經儲存.\033[00m' % icon_title
-            file_string = BytesIO()
-            for part in post_image.chunks():  # 將上傳的資料儲存於記憶體
-                file_string.write(part)
-                file_string.flush()
+            if not post_image:
+                # Fallback if IconImage is missing or named differently
+                post_image = next(iter(request.FILES.values()), None)
 
-            file_name = post_image.name
-            image = make_thumbnail(file_string, file_name, size=(800, 800))
+            if post_image:
+                message = '\033[93m*** 圖片 [%s] 已經儲存.\033[00m' % icon_title
+                file_string = BytesIO()
+                for part in post_image.chunks():  # 將上傳的資料儲存於記憶體
+                    file_string.write(part)
+                    file_string.flush()
 
-            try:
-                new_image = UploadIcons.objects.create()
-                new_image.Title = icon_title
-                new_image.Description = icon_description
-                new_image.IconImage = image
-                # print('Save')
-                new_image.save()
-                print(message)
+                file_name = post_image.name
+                # If front-end already compressed it, we still run make_thumbnail for safety (exif orientation, standardizing format), but it will keep the compressed aspect.
+                image = make_thumbnail(file_string, file_name, size=(800, 800))
 
-            except Exception as e:
-                print('The erro: %s' % e)
+                try:
+                    new_image = UploadIcons.objects.create()
+                    new_image.Title = icon_title
+                    new_image.Description = icon_description
+                    new_image.IconImage = image
+                    # print('Save')
+                    new_image.save()
+                    print(message)
+
+                except Exception as e:
+                    print('The erro: %s' % e)
+            else:
+                print('No file uploaded')
 
             return redirect(reverse('fileupload:home'))
         else:
@@ -164,8 +172,8 @@ def save_to_file(request):
     # Direct Save to file.
     if request.method == 'POST':
         receive_form = UploadFileForm(request.POST, request.FILES)
-        receive_file = request.FILES['file']
-        if receive_form.is_valid():
+        receive_file = request.FILES.get('file')
+        if receive_file and receive_form.is_valid():
             # print(type(receive_file))
             # print('The size of file is %d bytes' % receive_file.size)
             now_time = datetime.datetime.now()
