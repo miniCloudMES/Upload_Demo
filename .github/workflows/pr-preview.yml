@@ -1,0 +1,65 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Render Preview Deploy
+        id: deploy
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"serviceId\":\"${{ secrets.RENDER_SERVICE_ID }}\"}" \
+            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys )
+
+          echo "Response: $RESPONSE"
+
+          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+          if [ -z "$DEPLOY_ID" ]; then
+            echo "Failed to trigger deploy"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
+
+      - name: Wait for deploy
+        run: |
+          for i in {1..60}; do
+            STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys/${{ steps.deploy.outputs.deploy_id }}" | jq -r '.status')
+
+            echo "[$i] Deploy status: $STATUS"
+
+            if [ "$STATUS" = "live" ]; then
+              echo "✅ Deploy complete"
+              exit 0
+            elif [ "$STATUS" = "build_failed" ] || [ "$STATUS" = "deploy_failed" ]; then
+              echo "❌ Deploy failed"
+              exit 1
+            fi
+
+            sleep 5
+          done
+
+          echo "Timeout waiting for deploy"
+          exit 1
+
+      - name: Comment Preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## 🚀 Preview Ready\n\nhttps://upload-demo-preview.onrender.com\n\nThis preview is for PR #' + context.issue.number
+            })
