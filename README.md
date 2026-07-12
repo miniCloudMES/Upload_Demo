@@ -1,4 +1,4 @@
-# Files-Upload-Demo
+# Photo-Upload-Demo
 The Project is show how to manage upload files with Django.  
 ***
 Free for personal use.  
