@@ -13,10 +13,10 @@
 """
 __author__ = 'Karo Lin'
 
-app_name = 'fileupload'
-
 from django.urls import path
 from . import views
+
+app_name = 'fileupload'
 
 urlpatterns = [
     path('', views.home, name='home'),

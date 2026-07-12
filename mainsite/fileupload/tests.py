@@ -1,7 +1,6 @@
 from django.test import TestCase
 
 # Create your tests here.
-from .models import UploadIcons
 from .forms import UploadIconModelForm
 
 # Model Tests

@@ -6,7 +6,7 @@ from os.path import join, isfile, isdir
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.db.models.signals import post_delete, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
@@ -14,7 +14,7 @@ from django.urls import reverse
 
 from .forms import UploadFileForm, UploadIconModelForm
 from .models import UploadIcons
-from .utility import make_thumbnail, sizeof_fmt
+from .utility import make_thumbnail
 
 
 def home(request):
@@ -158,13 +158,13 @@ def pre_save_image(sender, instance, *args, **kwargs):
         old_img = instance.__class__.objects.get(id=instance.id).IconImage.path
         try:
             new_img = instance.IconImage.path
-        except:
+        except (AttributeError, KeyError, IndexError):
             new_img = None
         if new_img != old_img:
             import os
             if os.path.exists(old_img):
                 os.remove(old_img)
-    except:
+    except Exception:
         pass
 
 
