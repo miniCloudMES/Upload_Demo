@@ -23,6 +23,12 @@ jobs:
           cd mainsite
           pip install -r requirements.txt
 
+      - name: Lint with ruff
+        run: |
+          cd mainsite
+          pip install ruff
+          ruff check .
+
       - name: Run Django checks
         run: |
           cd mainsite
