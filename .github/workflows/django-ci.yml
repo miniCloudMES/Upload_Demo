@@ -1,0 +1,37 @@
+name: Django CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          cd mainsite
+          pip install -r requirements.txt
+
+      - name: Run Django checks
+        run: |
+          cd mainsite
+          python manage.py check
+
+      - name: Run tests
+        env:
+          SECRET_KEY: test-secret-key
+          DEBUG: "True"
+        run: |
+          cd mainsite
+          python manage.py test
