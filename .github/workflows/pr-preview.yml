@@ -11,47 +11,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Trigger Render Preview Deploy
-        id: deploy
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_DEPLOY_KEY }}
+
+      - name: Deploy to minios
         run: |
-          RESPONSE=$(curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"serviceId\":\"${{ secrets.RENDER_SERVICE_ID }}\"}" \
-            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys )
+          ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 live@10.10.10.108 '/home/live/scripts/deploy-upload-demo.sh'
 
-          echo "Response: $RESPONSE"
-
-          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
-          if [ -z "$DEPLOY_ID" ]; then
-            echo "Failed to trigger deploy"
-            echo "$RESPONSE"
-            exit 1
-          fi
-
-          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
-
-      - name: Wait for deploy
+      - name: Get preview URL
+        id: preview
         run: |
-          for i in {1..60}; do
-            STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-              "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys/${{ steps.deploy.outputs.deploy_id }}" | jq -r '.status')
-
-            echo "[$i] Deploy status: $STATUS"
-
-            if [ "$STATUS" = "live" ]; then
-              echo "✅ Deploy complete"
-              exit 0
-            elif [ "$STATUS" = "build_failed" ] || [ "$STATUS" = "deploy_failed" ]; then
-              echo "❌ Deploy failed"
-              exit 1
-            fi
-
-            sleep 5
-          done
-
-          echo "Timeout waiting for deploy"
-          exit 1
+          URL=$(ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 live@10.10.10.108 \
+            'curl -s http://127.0.0.1:4040/api/tunnels | python3 -c "import sys,json; t=json.load(sys.stdin)[\"tunnels\"][0]; print(t[\"public_url\"])"')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "Preview URL: $URL"
 
       - name: Comment Preview URL
         uses: actions/github-script@v7
@@ -61,5 +36,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '## 🚀 Preview Ready\n\nhttps://upload-demo-preview.onrender.com\n\nThis preview is for PR #' + context.issue.number
+              body: '## Preview Ready\n\n${{ steps.preview.outputs.url }}\n\nThis preview is for PR #' + context.issue.number
             })
