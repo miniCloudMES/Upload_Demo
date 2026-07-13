@@ -20,6 +20,6 @@ from django.urls import path, include
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
-                  path('', include('fileupload.urls', namespace='fileupload')),
+                  path('', include('fileupload.urls', namespace='file upload')),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

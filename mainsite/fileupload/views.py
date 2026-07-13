@@ -82,7 +82,6 @@ def save_to_model(request):
         key = request.POST.get("captcha_0", None)  # Database store
 
         if icon_title is not None:
-
             # Reduce image size
             post_image = request.FILES.get('IconImage')
             if not post_image:
@@ -110,17 +109,19 @@ def save_to_model(request):
                     print(message)
 
                 except Exception as e:
-                    print('The erro: %s' % e)
+                    print('The error: %s' % e)
             else:
                 print('No file uploaded')
-
-            return redirect(reverse('fileupload:home'))
         else:
             icons = UploadIcons.objects.all()
             upload_form = UploadFileForm
             icon_form = UploadIconModelForm
             message = '檔案不存在！'
-            return render(request, 'fileupload/home.html', locals())
+        return HttpResponseRedirect(reverse('file upload:home'))
+    else:
+        upload_form = UploadFileForm()
+        icon_form = UploadIconModelForm()
+        return render(request, 'fileupload/home.html', locals())
 
 
 def update(request, image_id):
@@ -147,7 +148,7 @@ def update(request, image_id):
     # print(image_file)
     print('\033[93m*** 圖片[%s]已更新:\033[00m' % pick_data.Title)
     pick_data.save()
-    return HttpResponseRedirect(reverse('fileupload:home'))
+    return HttpResponseRedirect(reverse('file upload:home'))
 
 
 # 更新使用 FileField 或是 ImageField 儲存的檔案
@@ -164,8 +165,8 @@ def pre_save_image(sender, instance, *args, **kwargs):
             import os
             if os.path.exists(old_img):
                 os.remove(old_img)
-    except Exception:
-        pass
+    except Exception as e:
+        print('The error: %s' % e)
 
 
 def save_to_file(request):
@@ -195,4 +196,4 @@ def save_to_file(request):
             fs.save(store_path + new_file_name, image_file)
             message = '\033[93m*** 圖片 [%s] 已經儲存為 [%s].\033[00m' % (receive_file, new_file_name)
             print(message)
-    return redirect(reverse('fileupload:home'))
+    return redirect(reverse('file upload:home'))
