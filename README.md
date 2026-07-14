@@ -29,4 +29,4 @@ Start Up server with the command below:
 ```commandline
 python manage.py runserver 0.0.0.0:8000
 ```
-
+使用本地Linux測試部署Project
