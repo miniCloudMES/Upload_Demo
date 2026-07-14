@@ -30,3 +30,10 @@ Start Up server with the command below:
 python manage.py runserver 0.0.0.0:8000
 ```
 使用本地Linux測試部署Project
+
+#Date
+2023-08-01
+#Time
+10:00:00
+
+### Test Github Deployment
